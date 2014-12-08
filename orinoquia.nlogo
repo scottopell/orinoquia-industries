@@ -1,10 +1,26 @@
-breed [ people person ] ;; defines inhabitants of orinoquia
+globals [ total-capital total-people ]
+
+breed [  ff-factories ff-factory ]
+breed [  p-factories  p-factory  ]
+breed [  lg-factories lg-factory ]
+breed [  bf-factories bf-factory ]
 patches-own [ orinoquia? ] ;; defines if a patch is in orinoquia
+turtles-own [    ;; All turtles have these properties
+  success        ;; Change this to reflect how well your industry is doing
+                 ;; The range is 0.0 (very poor) and 1.0 (very well)
+  capital-share  ;; Don't modify
+  people-share   ;; Don't modify
+]
+ff-factories-own [
+  power
+]
 
 to setup
   clear-all
+  set total-capital initial-total-capital
+  set total-people  initial-total-people
   setup-patches
-  setup-people
+  setup-fossil-fuels
   reset-ticks
 end
 
@@ -18,37 +34,91 @@ to setup-patches
     if orinoquia? = 1 [
       set pcolor green
     ] ;; makes orinoquia region green
-    if orinoquia? = 1 [
-      if random 100 < 1 [
-          set pcolor red
-      ] ;; makes random red towns in orinoquia
-    ]
   ]
-end
-
-to setup-people
-  set-default-shape people "person"
-  create-people people-number ;; reads slider to say how many should be created
-  ask people [ setxy 0 0 ]
 end
 
 to go
-  move-people
-  do-stuff
+  do-ff
+  god
   tick
 end
 
-to move-people
-  ask people [
-    right random 360
-    forward 1
-    if orinoquia? = 0 [
-      right 180
-      forward 1 ]  ;; This stops the people from leaving orinoquia
+to god
+  foreach sort-on [ success ] turtles [
+    print ?
+  ]   
+end
+
+;; Reporters - These return information based on a turtle's properties
+
+to-report industry-people ;; returns the amount of people available to work in the fossil fuel industry
+  report total-people * people-share
+end
+
+to-report industry-capital ;; returns the amount of money allocated to the fossil fuel industry
+  report total-capital * capital-share
+end
+
+;;;;;;; Fossil Fuels ;;;;;;;;;;
+
+;;;;; Setup
+to setup-industries
+  setup-fossil-fuels
+  setup-logs
+  setup-palm
+  setup-beef
+  ask turtles [
+    set success .25
   ]
 end
 
-to do-stuff ;; This area can be used for additional subprocedures of the "to go" procedure
+to setup-fossil-fuels
+  set-default-shape ff-factories "factory"
+  create-ff-factories 1
+  ask ff-factories [
+    set capital-share initial-ff-capital-share
+    set power industry-capital * industry-people
+  ]
+  
+  ask patches with [pxcor >= -4 and pxcor <= 0 and pycor >= -5 and pycor <= -1] [
+    set pcolor red;; - ff-power / 102000000000 - 0.0000001 ;;; TODO - scale the color with the success of the industry
+  ]
+end
+
+;;;;; End Setup
+
+;; Main Method
+to do-ff
+  ;; main algorith here
+  ask ff-factories [
+    set success success + .15
+  ]
+end
+
+
+
+
+;;;;;;; End Fossil Fuels ;;;;;;;;;;
+
+to setup-logs
+  create-lg-factories 1
+  ask lg-factories [
+    set capital-share initial-log-capital-share
+  ]
+end
+
+to setup-palm
+  create-p-factories 1
+  ask p-factories [
+    set capital-share initial-palm-capital-share
+  ]
+end
+
+to setup-beef
+  create-bf-factories 1
+  ask bf-factories [
+    set capital-share initial-beef-capital-share
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -112,21 +182,6 @@ NIL
 NIL
 1
 
-SLIDER
-244
-603
-416
-636
-people-number
-people-number
-0
-100
-51
-1
-1
-NIL
-HORIZONTAL
-
 MONITOR
 439
 595
@@ -137,6 +192,133 @@ count turtles
 17
 1
 13
+
+SLIDER
+599
+88
+777
+121
+initial-total-people
+initial-total-people
+4000
+9000
+8950
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+599
+41
+800
+74
+initial-total-capital
+initial-total-capital
+250000
+1000000
+1000000
+10000
+1
+NIL
+HORIZONTAL
+
+SLIDER
+896
+43
+1088
+76
+initial-ff-capital-share
+initial-ff-capital-share
+0
+100
+100
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+904
+265
+1097
+298
+initial-ff-people-share
+initial-ff-people-share
+0
+100
+100
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+898
+95
+1100
+128
+initial-log-capital-share
+initial-log-capital-share
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+898
+153
+1110
+186
+initial-palm-capital-share
+initial-palm-capital-share
+0
+100
+100
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+902
+207
+1111
+240
+initial-beef-capital-share
+initial-beef-capital-share
+0
+100
+1000000
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+652
+583
+765
+628
+Money
+total-capital
+17
+1
+11
+
+MONITOR
+650
+641
+769
+686
+Workers
+total-people
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -282,6 +464,26 @@ Circle -7500403 true true 8 8 285
 Circle -16777216 true false 60 75 60
 Circle -16777216 true false 180 75 60
 Polygon -16777216 true false 150 168 90 184 62 210 47 232 67 244 90 220 109 205 150 198 192 205 210 220 227 242 251 229 236 206 212 183
+
+factory
+false
+0
+Rectangle -7500403 true true 76 194 285 270
+Rectangle -7500403 true true 36 95 59 231
+Rectangle -16777216 true false 90 210 270 240
+Line -7500403 true 90 195 90 255
+Line -7500403 true 120 195 120 255
+Line -7500403 true 150 195 150 240
+Line -7500403 true 180 195 180 255
+Line -7500403 true 210 210 210 240
+Line -7500403 true 240 210 240 240
+Line -7500403 true 90 225 270 225
+Circle -1 true false 37 73 32
+Circle -1 true false 55 38 54
+Circle -1 true false 96 21 42
+Circle -1 true false 105 40 32
+Circle -1 true false 129 19 42
+Rectangle -7500403 true true 14 228 78 270
 
 fish
 false
