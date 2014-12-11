@@ -15,12 +15,13 @@ ff-factories-own [
   power
 ]
 
+
 to setup
   clear-all
   set total-capital initial-total-capital
   set total-people  initial-total-people
   setup-patches
-  setup-fossil-fuels
+  setup-industries
   reset-ticks
 end
 
@@ -39,23 +40,42 @@ end
 
 to go
   do-ff
+
+  
   god
   tick
 end
 
 to god
-  foreach sort-on [ success ] turtles [
-    print ?
-  ]   
+  let ordered sort-on [ success ] turtles
+  print "rdereded"
+  print ordered
+  print item 0 ordered
+  ask item 3 ordered [
+    set capital-share capital-share + .10
+    set people-share people-share + .10
+  ]
+ ask item 2 ordered [
+    set capital-share capital-share + .05
+    set people-share people-share + .05
+  ]
+  ask item 1 ordered [
+    set capital-share capital-share - .05
+    set people-share people-share - .05
+  ]
+  ask item 0 ordered [
+    set capital-share capital-share - .10
+    set people-share people-share - .10
+  ]
 end
 
 ;; Reporters - These return information based on a turtle's properties
 
-to-report industry-people ;; returns the amount of people available to work in the fossil fuel industry
+to-report industry-people ;; returns the amount of people available to work in a given industry
   report total-people * people-share
 end
 
-to-report industry-capital ;; returns the amount of money allocated to the fossil fuel industry
+to-report industry-capital ;; returns the amount of money allocated to a given industry
   report total-capital * capital-share
 end
 
@@ -92,6 +112,9 @@ to do-ff
   ;; main algorith here
   ask ff-factories [
     set success success + .15
+    if industry-people > 7000 [
+      set success success + .30
+    ]
   ]
 end
 
@@ -101,6 +124,7 @@ end
 ;;;;;;; End Fossil Fuels ;;;;;;;;;;
 
 to setup-logs
+  set-default-shape lg-factories "factory"
   create-lg-factories 1
   ask lg-factories [
     set capital-share initial-log-capital-share
@@ -108,6 +132,7 @@ to setup-logs
 end
 
 to setup-palm
+  set-default-shape p-factories "factory"
   create-p-factories 1
   ask p-factories [
     set capital-share initial-palm-capital-share
@@ -115,6 +140,7 @@ to setup-palm
 end
 
 to setup-beef
+  set-default-shape bf-factories "factory"
   create-bf-factories 1
   ask bf-factories [
     set capital-share initial-beef-capital-share
@@ -232,7 +258,7 @@ initial-ff-capital-share
 initial-ff-capital-share
 0
 100
-100
+21
 1
 1
 NIL
@@ -319,6 +345,42 @@ total-people
 17
 1
 11
+
+PLOT
+827
+447
+1027
+597
+Success Rates
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Fossil Fuels" 1.0 0 -16777216 true "" "plot [success] of ff-factory 0"
+"Palm Oil" 1.0 0 -7500403 true "" "plot [success] of p-factory 0"
+"Logging" 1.0 0 -2674135 true "" "plot [success] of lg-factory 0"
+"Beef" 1.0 0 -955883 true "" "plot [success] of bf-factory 0"
+
+SLIDER
+672
+243
+868
+276
+initial_beef_retail_price
+initial_beef_retail_price
+0
+100
+73
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
