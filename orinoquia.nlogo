@@ -23,10 +23,9 @@ ff-factories-own [
 lg-factories-own [
   first-year-ha-cost 
   ha-annual-cost 
-  ha-land-cost 
-  pulpwood-price 
-  wood-to-be-treated-price
-  sawtimber-price
+  ha-land-cost  
+  
+  
   factory-capital
   m^3-per-ha
   average-sale-price
@@ -204,21 +203,21 @@ to setup-logs
     set ycor -1
     set color 115
     set first-year-ha-cost 1476
+    set factory-capital industry-capital
     set ha-annual-cost 82.35
-    set ha-land-cost price-per-ha
-    set pulpwood-price pulpwood-sale-price;; 33 per m^3
-    set wood-to-be-treated-price wood-to-be-treated-sale-price;; 74 per m^3
-    set sawtimber-price sawtimber-sale-price;; 66 per m^3
-    set m^3-per-ha m^3-yield-per-ha
-    set market-buy-price discount-rate
-    set tax-rate log-farm-annual-tax-rate
-    set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - market-buy-price) );;note: gives equal weight....
+    ;; set ha-land-cost price-per-ha
+    ;; set pulpwood-price pulpwood-sale-price;; 33 per m^3
+    ;; set wood-to-be-treated-price wood-to-be-treated-sale-price;; 74 per m^3
+    ;; set sawtimber-price sawtimber-sale-price;; 66 per m^3
+    ;; set m^3-per-ha m^3-yield-per-ha
+    ;; set market-buy-price discount-rate
+    ;; set tax-rate log-farm-annual-tax-rate
+    ;;note: gives equal weight....
   ]
 end
 
 to do-lg
   log-trees-and-money
-  log-tax
   log-jobs
   log-impact
   log-display
@@ -227,24 +226,19 @@ end
 
 to log-trees-and-money
     ask lg-factories [
-  let new-industry-capital (factory-capital + industry-capital - annual-expense + annual-sales )
-  set factory-capital new-industry-capital 
-    if factory-capital > (14760 + price-per-ha) [
+  set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
+  set factory-capital ( ( factory-capital + (annual-sales * (1 - tax-rate)) + (industry-capital * (1 - tax-rate)) ) - annual-expense ) 
+    if factory-capital > (14760 + (price-per-ha * 10) ) [
       set ha-of-trees ha-of-trees + 10
-      set factory-capital factory-capital - (14760 + price-per-ha)
-  let new-ha-of-trees ( ha-of-trees * .98 )
-  set ha-of-trees new-ha-of-trees
+      set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
+      set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
+    ] 
+
+    if factory-capital < 0 [
+      set ha-of-trees ha-of-trees - 10
+      set factory-capital factory-capital + ( price-per-ha * 10 )
   ]
     ]
-end
-
-to log-tax
-  ask lg-factories [
-    let new-tax-revenue-generated (tax-revenue-generated + ( factory-capital * tax-rate ) )
-    let new-factory-capital ( factory-capital - (factory-capital - tax-rate ) )
-    set tax-revenue-generated new-tax-revenue-generated
-    set factory-capital new-factory-capital
-  ]
 end
 
 to log-jobs
@@ -271,18 +265,15 @@ to log-success
   
 end
 
-
 ;;Report shit back;;
 
-to-report annual-expense ;; lg-number-of-ha * lg-ha-cost-till20
+to-report annual-expense
   report ( ha-of-trees * ha-annual-cost ) 
 end
 
 to-report annual-sales
-  report ( ha-of-trees * m^3-per-ha * average-sale-price )
+  report ( ha-of-trees * m^3-yield-per-ha * average-sale-price )
 end
-
-
 
 ;;;;;;;;;; End Logs;;;;;;;;;;;;;
 to setup-palm
@@ -397,7 +388,7 @@ initial-total-capital
 initial-total-capital
 0
 1000000
-1000000
+310000
 10000
 1
 NIL
@@ -545,7 +536,7 @@ price-per-ha
 price-per-ha
 0
 4000
-985
+1000
 1
 1
 NIL
@@ -556,11 +547,11 @@ SLIDER
 106
 1001
 139
-pulpwood-sale-price
-pulpwood-sale-price
+pulpwood-price
+pulpwood-price
 0
 100
-100
+33
 1
 1
 NIL
@@ -569,13 +560,13 @@ HORIZONTAL
 SLIDER
 790
 172
-1001
+1007
 205
-wood-to-be-treated-sale-price
-wood-to-be-treated-sale-price
+wood-to-be-treated-price
+wood-to-be-treated-price
 0
 100
-100
+74
 1
 1
 NIL
@@ -586,11 +577,11 @@ SLIDER
 139
 1001
 172
-sawtimber-sale-price
-sawtimber-sale-price
+sawtimber-price
+sawtimber-price
 0
 100
-100
+66
 1
 1
 NIL
@@ -605,7 +596,7 @@ m^3-yield-per-ha
 m^3-yield-per-ha
 0
 40
-40
+20
 1
 1
 NIL
@@ -629,14 +620,14 @@ HORIZONTAL
 SLIDER
 791
 321
-1002
+1009
 354
 log-farm-annual-tax-rate
 log-farm-annual-tax-rate
-0
-100
-0
+0.0
+1.0
 1
+.01
 1
 NIL
 HORIZONTAL
@@ -862,6 +853,7 @@ Balance
 1
 11
 
+
 SLIDER
 1020
 203
@@ -876,6 +868,51 @@ ff-worker-wage
 1
 NIL
 HORIZONTAL
+
+MONITOR
+792
+497
+1007
+542
+NIL
+[industry-capital] of lg-factory 1
+17
+1
+11
+
+MONITOR
+792
+542
+1087
+587
+NIL
+14760 + ( 10 * [price-per-ha] of lg-factory 1)
+17
+1
+11
+
+MONITOR
+1008
+496
+1272
+541
+NIL
+[tax-revenue-generated ] of lg-factory 1
+17
+1
+11
+
+MONITOR
+1000
+407
+1205
+452
+NIL
+[annual-sales] of lg-factory 1
+17
+1
+11
+
 
 @#$#@#$#@
 ## WHAT IS IT?
