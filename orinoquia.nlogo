@@ -18,6 +18,7 @@ ff-factories-own [
   max-gov-reg
   extraction-sites
   max-extraction-sites
+  bank-balance
 ]
 
 lg-factories-own [
@@ -118,10 +119,11 @@ to setup-fossil-fuels
   create-ff-factories 1
   ask ff-factories [
     set capital-share initial-ff-capital-share
-    set power industry-capital * industry-people
+    set people-share initial-ff-people-share
     set max-gov-reg 50
     set extraction-sites 10
     set max-extraction-sites 100
+    set bank-balance industry-capital
   ]
   
   ask patches with [pxcor >= -4 and pxcor <= 0 and pycor >= -5 and pycor <= -1] [
@@ -135,6 +137,12 @@ end
 to do-ff
   ;; main algorith here
   ask ff-factories [
+    
+    set bank-balance bank-balance + industry-capital
+    if bank-balance > 7000000 [
+      set extraction-sites extraction-sites + 1
+      set bank-balance bank-balance - 7000000
+    ]
 
     ; Success Calculation here
     
@@ -473,7 +481,7 @@ NIL
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 false
 "" ""
