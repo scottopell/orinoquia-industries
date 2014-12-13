@@ -19,6 +19,12 @@ ff-factories-own [
   max-extraction-sites
   bank-balance
 ]
+p-factories-own [
+  bank-balance
+  palm-tree-has
+  max-palm-tree-has
+]
+  
 
 lg-factories-own [
   first-year-ha-cost 
@@ -63,6 +69,7 @@ end
 to go
   do-ff
   do-lg
+  do-palm
   
   god
   tick
@@ -123,6 +130,8 @@ to setup-fossil-fuels
     set max-extraction-sites 200
     set bank-balance industry-capital
   ]
+  ;;477 orinoquia patches
+
   
   ask patches with [pxcor >= -4 and pxcor <= 0 and pycor >= -5 and pycor <= -1] [
     set pcolor red;; - ff-power / 102000000000 - 0.0000001 ;;; TODO - scale the color with the success of the industry
@@ -281,8 +290,61 @@ to setup-palm
   create-p-factories 1
   ask p-factories [
     set capital-share initial-palm-capital-share
+    set people-share initial-palm-people-share
+    set bank-balance industry-capital
+    set max-palm-tree-has 20000
   ]
 end
+
+to do-palm
+  ;; main algorith here
+  ask p-factories [
+    
+    if bank-balance < 0 [
+      set palm-tree-has palm-tree-has - 1
+    ]
+    
+    set bank-balance bank-balance + (industry-capital  * (1 - p-curr-tax-rate))
+
+    if bank-balance > curr-palm-tree-ha-cost and palm-tree-has < max-palm-tree-has [
+      set palm-tree-has palm-tree-has + 1
+      set bank-balance bank-balance - curr-palm-tree-ha-cost
+    ]
+    
+    let tons-oil-per-ha 4
+
+    let profit palm-tree-has * tons-oil-per-ha * price-per-ton-oil
+       
+    ;; jobs provided
+    let max-jobs industry-people
+    let curr-jobs palm-tree-has * 10 ;; assuming that each extraction site can sustain 400 people working there
+    if curr-jobs > industry-people [
+      set curr-jobs industry-people
+    ]
+    
+    let expenses curr-jobs * (p-worker-wage / 12)
+    
+    set bank-balance bank-balance + ( (profit - expenses) * (1 - p-curr-tax-rate) )
+
+    ; Success Calculation here
+    
+    ;; define the maximum tax rate that this industry could sustain
+    let max-tax-rate 0.45
+    ;let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
+
+    
+    let running-success-total 0
+    set running-success-total 0.33 * .2
+    set running-success-total running-success-total + (0.33 * (p-curr-tax-rate / max-tax-rate))
+    set running-success-total running-success-total + (0.33 * curr-jobs / max-jobs)
+
+    set success running-success-total
+
+  ]
+  
+  
+end
+
 
 to setup-beef
   set-default-shape bf-factories "factory"
@@ -388,7 +450,7 @@ initial-total-capital
 initial-total-capital
 0
 1000000
-310000
+670000
 10000
 1
 NIL
@@ -853,7 +915,6 @@ Balance
 1
 11
 
-
 SLIDER
 1020
 203
@@ -863,7 +924,7 @@ ff-worker-wage
 ff-worker-wage
 10000
 40000
-40000
+22500
 500
 1
 NIL
@@ -892,10 +953,10 @@ NIL
 11
 
 MONITOR
-1008
-496
-1272
-541
+803
+641
+1067
+686
 NIL
 [tax-revenue-generated ] of lg-factory 1
 17
@@ -903,16 +964,97 @@ NIL
 11
 
 MONITOR
-1000
-407
-1205
-452
+803
+589
+1008
+634
 NIL
 [annual-sales] of lg-factory 1
 17
 1
 11
 
+SLIDER
+1424
+107
+1596
+140
+p-curr-tax-rate
+p-curr-tax-rate
+0.0
+1
+0.32
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1424
+144
+1598
+177
+curr-palm-tree-ha-cost
+curr-palm-tree-ha-cost
+1000
+4000
+3151
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1424
+183
+1596
+216
+price-per-ton-oil
+price-per-ton-oil
+500
+1500
+1003
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1424
+216
+1596
+249
+p-worker-wage
+p-worker-wage
+2000
+10000
+3885
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+1451
+280
+1578
+325
+P-Money
+[bank-balance] of p-factory 2
+2
+1
+11
+
+MONITOR
+1452
+336
+1578
+381
+Current Hectacres
+[palm-tree-has] of p-factory 2
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
