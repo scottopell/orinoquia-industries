@@ -14,7 +14,6 @@ turtles-own [    ;; All turtles have these properties
   people-share   ;; Don't modify
 ]
 ff-factories-own [
-  power
   max-gov-reg
   extraction-sites
   max-extraction-sites
@@ -121,7 +120,7 @@ to setup-fossil-fuels
     set capital-share initial-ff-capital-share
     set people-share initial-ff-people-share
     set max-gov-reg 50
-    set extraction-sites 10
+    set extraction-sites 2
     set max-extraction-sites 200
     set bank-balance industry-capital
   ]
@@ -138,6 +137,10 @@ to do-ff
   ;; main algorith here
   ask ff-factories [
     
+    if bank-balance < 0 [
+      set extraction-sites extraction-sites - 1
+    ]
+    
     set bank-balance bank-balance + (industry-capital  * (1 - ff-curr-tax-rate))
     let current-well-cost 7000000  * (1 + ( extraction-sites / max-extraction-sites) )
 
@@ -145,10 +148,21 @@ to do-ff
       set extraction-sites extraction-sites + 1
       set bank-balance bank-balance - current-well-cost
     ]
-    let barrels-produced-per-site 500
-    let profit extraction-sites * barrels-produced-per-site * price-per-barrel
     
-    set bank-balance bank-balance + profit * (1 - ff-curr-tax-rate)
+    let barrels-produced-per-site 500
+    set barrels-produced-per-site barrels-produced-per-site - (100 * ff-curr-gov-reg / max-gov-reg )
+    let profit extraction-sites * barrels-produced-per-site * price-per-barrel 
+       
+    ;; jobs provided
+    let max-jobs industry-people
+    let curr-jobs extraction-sites * 10 ;; assuming that each extraction site can sustain 400 people working there
+    if curr-jobs > industry-people [
+      set curr-jobs industry-people
+    ]
+    
+    let expenses curr-jobs * (ff-worker-wage / 12)
+    
+    set bank-balance bank-balance + ( (profit - expenses) * (1 - ff-curr-tax-rate) )
 
     ; Success Calculation here
     
@@ -160,13 +174,7 @@ to do-ff
     ;; define the maximum tax rate that this industry could sustain
     let max-tax-rate 0.85
     ;let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
-    
-    ;; jobs provided
-    let max-jobs industry-people
-    let curr-jobs extraction-sites * 400 ;; assuming that each extraction site can sustain 400 people working there
-    if curr-jobs > industry-people [
-      set curr-jobs 400
-    ]
+
     
     let running-success-total 0
     set running-success-total 0.33 * curr-env-impact / max-env-impact
@@ -727,7 +735,7 @@ ff-curr-gov-reg
 ff-curr-gov-reg
 0
 50
-20
+8
 1
 1
 NIL
@@ -789,7 +797,7 @@ ff-curr-tax-rate
 ff-curr-tax-rate
 0
 1
-0.72
+0.22
 .01
 1
 NIL
@@ -804,8 +812,67 @@ price-per-barrel
 price-per-barrel
 0
 100
-57
+69
 1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+1068
+254
+1125
+299
+Wells
+[extraction-sites] of ff-factory 0
+1
+1
+11
+
+MONITOR
+799
+371
+987
+416
+NIL
+[ha-of-trees] of lg-factory 1
+17
+1
+11
+
+MONITOR
+789
+426
+995
+471
+NIL
+[factory-capital] of lg-factory 1
+17
+1
+11
+
+MONITOR
+1035
+315
+1137
+360
+Balance
+[bank-balance] of ff-factory 0
+2
+1
+11
+
+SLIDER
+1020
+203
+1192
+236
+ff-worker-wage
+ff-worker-wage
+10000
+40000
+40000
+500
 1
 NIL
 HORIZONTAL
