@@ -3,6 +3,7 @@ globals [ total-capital total-people ]
 breed [  ff-factories ff-factory ]
 breed [  p-factories  p-factory  ]
 breed [  lg-factories lg-factory ]
+breed [  lg-fields    lg-field   ]
 breed [  bf-factories bf-factory ]
 patches-own [ orinoquia? ] ;; defines if a patch is in orinoquia
 turtles-own [    ;; All turtles have these properties
@@ -15,7 +16,23 @@ ff-factories-own [
   power
 ]
 
-
+lg-factories-own [
+  first-year-ha-cost 
+  ha-annual-cost 
+  ha-land-cost 
+  pulpwood-price 
+  wood-to-be-treated-price
+  sawtimber-price
+  factory-capital
+  m^3-per-ha
+  average-sale-price
+  ha-of-trees
+  market-buy-price
+  tax-rate
+  tax-revenue-generated
+  environmental-impact
+ 
+]
 to setup
   clear-all
   set total-capital initial-total-capital
@@ -40,7 +57,7 @@ end
 
 to go
   do-ff
-
+  do-lg
   
   god
   tick
@@ -76,7 +93,7 @@ to-report industry-people ;; returns the amount of people available to work in a
 end
 
 to-report industry-capital ;; returns the amount of money allocated to a given industry
-  report total-capital * capital-share
+  report total-capital * capital-share * .01
 end
 
 ;;;;;;; Fossil Fuels ;;;;;;;;;;
@@ -123,14 +140,87 @@ end
 
 ;;;;;;; End Fossil Fuels ;;;;;;;;;;
 
+
+;;;;;;;; Start Logs ;;;;;;;;;;;;;
 to setup-logs
   set-default-shape lg-factories "factory"
   create-lg-factories 1
   ask lg-factories [
     set capital-share initial-log-capital-share
+    set xcor 5 
+    set ycor -1
+    set color 115
+    set first-year-ha-cost 1476
+    set ha-annual-cost 82.35
+    set ha-land-cost price-per-ha
+    set pulpwood-price pulpwood-sale-price;; 33 per m^3
+    set wood-to-be-treated-price wood-to-be-treated-sale-price;; 74 per m^3
+    set sawtimber-price sawtimber-sale-price;; 66 per m^3
+    set m^3-per-ha m^3-yield-per-ha
+    set market-buy-price discount-rate
+    set tax-rate log-farm-annual-tax-rate
+    set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * ( ( 100 - market-buy-price ) * .01 ) ) ;;note: gives equal weight....
   ]
 end
 
+to do-lg
+  log-trees-and-money
+  log-tax
+  log-jobs
+  log-impact
+  log-infrastructure 
+
+end
+
+to log-trees-and-money
+    ask lg-factories [
+  let new-industry-capital (factory-capital + industry-capital - annual-expense + annual-sales )
+  let new-ha-of-trees ( ( ha-of-trees + annual-plant ) * .98 )
+  set factory-capital new-industry-capital
+  set ha-of-trees new-ha-of-trees
+  ]
+end
+
+to log-tax
+  ask lg-factories [
+    let new-tax-revenue-generated (tax-revenue-generated + ( factory-capital * tax-rate ) )
+    let new-factory-capital ( factory-capital - (factory-capital - tax-rate ) )
+    set tax-revenue-generated new-tax-revenue-generated
+    set factory-capital new-factory-capital
+  ]
+end
+
+to log-jobs
+  
+end
+
+to log-impact
+   ask lg-factories [
+   set environmental-impact 3 
+   ]
+end
+
+to log-infrastructure
+  
+end
+
+
+;;Report shit back;;
+
+to-report annual-expense ;; lg-number-of-ha * lg-ha-cost-till20
+  report ( (ha-of-trees * ha-annual-cost) +  (annual-plant * ( first-year-ha-cost + ha-land-cost ) ) )
+end
+
+to-report annual-sales
+  report ( ha-of-trees * m^3-per-ha * average-sale-price )
+end
+
+to-report annual-plant
+  report ( 10) ;; static number needs to be replaced with actual land purchased and planted
+end
+
+
+;;;;;;;;;; End Logs;;;;;;;;;;;;;
 to setup-palm
   set-default-shape p-factories "factory"
   create-p-factories 1
