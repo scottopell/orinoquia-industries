@@ -35,6 +35,7 @@ lg-factories-own [
   tax-rate
   tax-revenue-generated
   environmental-impact
+  log-employment
  
 ]
 to setup
@@ -194,7 +195,8 @@ to do-lg
   log-tax
   log-jobs
   log-impact
-  log-infrastructure 
+  log-display
+   
 
 end
 
@@ -217,7 +219,9 @@ to log-tax
 end
 
 to log-jobs
-  
+  ask lg-factories [
+    set log-employment (ha-of-trees * .1)
+  ]
 end
 
 to log-impact
@@ -226,8 +230,9 @@ to log-impact
    ]
 end
 
-to log-infrastructure
-  
+to log-display
+  set-default-shape lg-fields "tree"
+  create-lg-fields 1
 end
 
 
@@ -343,8 +348,8 @@ SLIDER
 initial-total-people
 initial-total-people
 4000
-9000
-8950
+10000
+10000
 50
 1
 NIL
@@ -357,9 +362,9 @@ SLIDER
 89
 initial-total-capital
 initial-total-capital
-250000
+0
 1000000
-540000
+1000000
 10000
 1
 NIL
@@ -667,7 +672,7 @@ initial-beef-people-share
 initial-beef-people-share
 0
 100
-40
+25
 1
 1
 NIL
