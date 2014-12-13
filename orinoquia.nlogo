@@ -12,6 +12,7 @@ turtles-own [    ;; All turtles have these properties
                  ;; The range is 0.0 (very poor) and 1.0 (very well)
   capital-share  ;; Don't modify
   people-share   ;; Don't modify
+  profit
 ]
 ff-factories-own [
   max-gov-reg
@@ -24,7 +25,27 @@ p-factories-own [
   palm-tree-has
   max-palm-tree-has
 ]
-  
+
+bf-factories-own [
+  land-expense
+  total-land-cost
+  ha-purchased
+  new-total-ha
+  total-ha
+  cost-per-ha
+  cost-of-grazing
+  cattle
+  cattle-per-ha
+  AUM
+  beef-retail-price
+  beef-production
+  percent-cattle-slaugtered
+  revenue
+  average-beef-price
+  total-expenses
+  bank-balance
+  revenue-tax
+]  
 
 lg-factories-own [
   first-year-ha-cost 
@@ -155,7 +176,7 @@ to do-ff
     
     let barrels-produced-per-site 500
     set barrels-produced-per-site barrels-produced-per-site - (100 * ff-curr-gov-reg / max-gov-reg )
-    let profit extraction-sites * barrels-produced-per-site * price-per-barrel 
+    set profit extraction-sites * barrels-produced-per-site * price-per-barrel 
        
     ;; jobs provided
     let max-jobs industry-people
@@ -353,7 +374,7 @@ to do-palm
     
     let tons-oil-per-ha 4
 
-    let profit palm-tree-has * tons-oil-per-ha * price-per-ton-oil
+    set profit palm-tree-has * tons-oil-per-ha * price-per-ton-oil
        
     ;; jobs provided
     let max-jobs industry-people
@@ -381,9 +402,8 @@ to do-palm
     set success running-success-total
 
   ]
-  
-  
 end
+
 
 
 to setup-beef
@@ -391,6 +411,80 @@ to setup-beef
   create-bf-factories 1
   ask bf-factories [
     set capital-share initial-beef-capital-share
+    set AUM 1.3
+    set cattle-per-ha 2
+    set beef-retail-price 5
+  ]
+end
+
+to do-bf
+  bf-bank-balance
+  bf-land
+  bf-cattle
+  bf-production
+  bf-profit
+end
+
+to bf-bank-balance
+  ask bf-factories [
+
+   set bank-balance bank-balance + industry-capital
+   if bank-balance > 20000 [
+     set ha-purchased ha-purchased + 1
+     set bank-balance bank-balance - 20000
+   ]
+  let max-env-impact (3)
+  let curr-env-impact .33 * .5
+
+  let max-tax-rate .65
+
+  let running-success-total 0
+  set running-success-total .33 * curr-env-impact / max-env-impact
+  set running-success-total running-success-total + (.33 * ( bf-tax-rate / max-tax-rate))
+  set running-success-total running-success-total + (.33 * industry-people)
+  ]
+end
+
+to bf-land
+
+  ask bf-factories [
+    set new-total-ha ( initial-ha + ha-purchased )
+  ]
+  ask bf-factories [
+    set total-land-cost  bf-cost-per-ha * new-total-ha
+  ]
+  ask bf-factories [
+    set cost-of-grazing  AUM * cattle
+  ]
+  ask bf-factories [
+    set land-expense  total-land-cost + cost-of-grazing
+  ]
+end
+
+to bf-cattle
+  ask bf-factories [
+    set cattle  new-total-ha * cattle-per-ha
+  ]
+end
+
+to bf-production
+  ask bf-factories [
+    set beef-production  cattle * percent-cattle-slaughtered
+  ]
+  ask bf-factories [
+    set revenue  beef-production * beef-retail-price
+  ]
+  ask bf-factories [
+    set total-expenses  land-expense + employee-compensation * industry-people
+  ]
+end
+
+to bf-profit
+  ask bf-factories [
+    set profit  revenue * bf-revenue-tax - total-expenses
+  ]
+  ask bf-factories [
+    set bank-balance  industry-capital * bf-tax-rate + profit
   ]
 end
 @#$#@#$#@
@@ -594,10 +688,10 @@ total-people
 13
 
 PLOT
-559
-443
-759
-593
+25
+595
+1014
+745
 Success Rates
 NIL
 NIL
@@ -985,7 +1079,6 @@ NIL
 1
 11
 
-
 SLIDER
 1424
 107
@@ -1067,6 +1160,96 @@ Current Hectacres
 2
 1
 11
+
+SLIDER
+1248
+189
+1420
+222
+bf-tax-rate
+bf-tax-rate
+0
+1
+0.23
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1234
+253
+1406
+286
+initial-ha
+initial-ha
+200
+780
+400
+10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1236
+310
+1408
+343
+bf-cost-per-ha
+bf-cost-per-ha
+0
+5000
+1200
+50
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1250
+393
+1475
+426
+percent-cattle-slaughtered
+percent-cattle-slaughtered
+0
+1
+0.2
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1227
+436
+1433
+469
+employee-compensation
+employee-compensation
+1000
+4000
+2000
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1184
+512
+1356
+545
+bf-revenue-tax
+bf-revenue-tax
+0
+1
+0.2
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
