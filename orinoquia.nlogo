@@ -24,20 +24,16 @@ lg-factories-own [
   first-year-ha-cost 
   ha-annual-cost 
   ha-land-cost  
-  
-  
   factory-capital
   m^3-per-ha
   average-sale-price
   ha-of-trees
-  market-buy-price
   tax-rate
   tax-revenue-generated
   environmental-impact
   log-employment
-  
- 
 ]
+
 to setup
   clear-all
   set total-capital initial-total-capital
@@ -198,6 +194,7 @@ to setup-logs
   set-default-shape lg-factories "factory"
   create-lg-factories 1
   ask lg-factories [
+    set people-share initial-lg-people-share
     set capital-share initial-log-capital-share
     set xcor 5 
     set ycor -1
@@ -221,24 +218,31 @@ to do-lg
   log-jobs
   log-impact
   log-display
-  log-success
+  ask lg-factories [
+    log-success
+  ]
 end
 
 to log-trees-and-money
     ask lg-factories [
   set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
-  set factory-capital ( ( factory-capital + (annual-sales * (1 - tax-rate)) + (industry-capital * (1 - tax-rate)) ) - annual-expense ) 
+  set factory-capital ( annual-in - annual-out ) 
     if factory-capital > (14760 + (price-per-ha * 10) ) [
       set ha-of-trees ha-of-trees + 10
       set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
       set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
     ] 
 
-    if factory-capital < 0 [
-      set ha-of-trees ha-of-trees - 10
-      set factory-capital factory-capital + ( price-per-ha * 10 )
+    if factory-capital < 100000 [
+      let ha-to-sell 10
+        if ha-to-sell > ha-of-trees [
+          set ha-to-sell 0
+        ]
+       set ha-of-trees ha-of-trees - ha-to-sell
+      set factory-capital factory-capital + ( price-per-ha * ha-to-sell )
   ]
     ]
+    
 end
 
 to log-jobs
@@ -255,26 +259,62 @@ end
 
 to log-display
   set-default-shape lg-fields "tree"
-  create-lg-fields 1
-  ask lg-fields [
+
+  if ([ha-of-trees] of lg-factory 1) > 6000 [
+    create-lg-fields 1 [
+      set xcor 6
+      set ycor -1
+    ]
   ]
     
+  if ([ha-of-trees] of lg-factory 1) > 12000 [
+    create-lg-fields 1 [
+      set xcor 5
+      set ycor -2
+    ]
+  ] 
 end
   
 to log-success
-  
+   ; Success Calculation here
+    
+
+    
+    ;; define the maximum tax rate that this industry could sustain
+    let max-tax-rate 0.70
+    ;let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
+
+    
+    let running-success-total 0
+    set running-success-total 0.33 * .5
+    set running-success-total running-success-total + (0.33 * (log-farm-annual-tax-rate / max-tax-rate))
+    set running-success-total running-success-total + (0.33 * log-employment / industry-people)
+
+    set success running-success-total
+    print success
 end
 
 ;;Report shit back;;
 
-to-report annual-expense
-  report ( ha-of-trees * ha-annual-cost ) 
+to-report annual-out
+  report ( ( ha-of-trees * ha-annual-cost ) + transport-cost + labor-cost)
+end
+
+to-report annual-in
+  report ( factory-capital + (annual-sales * (1 - tax-rate)) + (industry-capital * (1 - tax-rate)) )
 end
 
 to-report annual-sales
   report ( ha-of-trees * m^3-yield-per-ha * average-sale-price )
 end
 
+to-report labor-cost
+  report ( log-employment * 2000 )
+end
+
+to-report transport-cost
+  report ( distance-from-market * .13 * (ha-of-trees * m^3-yield-per-ha) )
+end
 ;;;;;;;;;; End Logs;;;;;;;;;;;;;
 to setup-palm
   set-default-shape p-factories "factory"
@@ -536,7 +576,7 @@ price-per-ha
 price-per-ha
 0
 4000
-1000
+1231
 1
 1
 NIL
@@ -626,7 +666,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0.0
 1.0
-1
+0.23
 .01
 1
 NIL
@@ -696,7 +736,7 @@ initial-beef-people-share
 initial-beef-people-share
 0
 100
-25
+11
 1
 1
 NIL
@@ -821,28 +861,6 @@ Wells
 11
 
 MONITOR
-799
-371
-987
-416
-NIL
-[ha-of-trees] of lg-factory 1
-17
-1
-11
-
-MONITOR
-789
-426
-995
-471
-NIL
-[factory-capital] of lg-factory 1
-17
-1
-11
-
-MONITOR
 1035
 315
 1137
@@ -852,7 +870,6 @@ Balance
 2
 1
 11
-
 
 SLIDER
 1020
@@ -869,50 +886,64 @@ ff-worker-wage
 NIL
 HORIZONTAL
 
-MONITOR
-792
-497
-1007
-542
-NIL
-[industry-capital] of lg-factory 1
-17
-1
-11
-
-MONITOR
-792
-542
-1087
-587
-NIL
-14760 + ( 10 * [price-per-ha] of lg-factory 1)
-17
-1
-11
-
-MONITOR
-1008
-496
-1272
-541
-NIL
-[tax-revenue-generated ] of lg-factory 1
-17
-1
-11
-
-MONITOR
+SLIDER
+791
+362
+1011
+395
+distance-from-market
+distance-from-market
+0
 1000
+517
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+799
 407
-1205
+974
 452
 NIL
-[annual-sales] of lg-factory 1
+[annual-in] of lg-factory 1
 17
 1
 11
 
+MONITOR
+800
+455
+985
+500
+NIL
+[annual-out] of lg-factory 1
+17
+1
+11
+
+MONITOR
+800
+506
+988
+551
+NIL
+[ha-of-trees] of lg-factory 1
+17
+1
+11
+
+MONITOR
+800
+554
+1008
+599
+NIL
+[factory-capital] of lg-factory 1
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
