@@ -14,6 +14,9 @@ turtles-own [    ;; All turtles have these properties
 ]
 ff-factories-own [
   power
+  max-gov-reg
+  extraction-sites
+  max-extraction-sites
 ]
 
 lg-factories-own [
@@ -115,6 +118,9 @@ to setup-fossil-fuels
   ask ff-factories [
     set capital-share initial-ff-capital-share
     set power industry-capital * industry-people
+    set max-gov-reg 50
+    set extraction-sites 10
+    set max-extraction-sites 100
   ]
   
   ask patches with [pxcor >= -4 and pxcor <= 0 and pycor >= -5 and pycor <= -1] [
@@ -128,11 +134,29 @@ end
 to do-ff
   ;; main algorith here
   ask ff-factories [
-    set success success + .15
-    if industry-people > 7000 [
-      set success success + .30
-    ]
+
+    ; Success Calculation here
+    
+    ;; get maximum environmental impact for THIS model (in my case its the max extractions sites * the max gov-reg ration (max ratio will always be 1)
+    let max-env-impact max-extraction-sites * (1)
+    ;; calculate the current environmental impact
+    let curr-env-impact extraction-sites * (ff-curr-gov-reg / max-gov-reg)
+    
+    ;; define the maximum tax rate that this industry could sustain
+    let max-tax-rate 0.85
+    let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
+    
+    ;; jobs provided
+    let max-jobs industry-people
+    let curr-jobs extraction-sites * 400 ;; assuming that each extraction site can sustain 400 people working there
+    
+    let running_success_total 0
+    set running_success_total 0.33 * curr-env-impact / max-env-impact
+    set running_success_total running_success_total + (0.33 * curr-tax-rate / max-tax-rate)
+    set running_success_total running_success_total + (0.33 * curr-jobs / max-jobs)
   ]
+  
+  
 end
 
 
@@ -453,9 +477,9 @@ false
 "" ""
 PENS
 "Fossil Fuels" 1.0 0 -16777216 true "" "plot [success] of ff-factory 0"
-"Palm Oil" 1.0 0 -7500403 true "" "plot [success] of p-factory 0"
-"Logging" 1.0 0 -2674135 true "" "plot [success] of lg-factory 0"
-"Beef" 1.0 0 -955883 true "" "plot [success] of bf-factory 0"
+"Palm Oil" 1.0 0 -7500403 true "" "plot [success] of p-factory 2"
+"Logging" 1.0 0 -2674135 true "" "plot [success] of lg-factory 1"
+"Beef" 1.0 0 -955883 true "" "plot [success] of bf-factory 3"
 
 SLIDER
 672
@@ -587,6 +611,21 @@ log-farm-annual-tax-rate
 0
 100
 50
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1157
+132
+1329
+165
+ff-curr-gov-reg
+ff-curr-gov-reg
+0
+50
+21
 1
 1
 NIL
