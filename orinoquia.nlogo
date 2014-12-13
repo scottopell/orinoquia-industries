@@ -810,68 +810,6 @@ price-per-barrel
 NIL
 HORIZONTAL
 
-MONITOR
-1084
-284
-1141
-329
-Wells
-[extraction-sites] of ff-factory 0
-2
-
-MONITOR
-792
-362
-1001
-407
-NIL
-[ha-of-trees] of lg-factory 1
-17
-1
-11
-
-MONITOR
-792
-407
-1001
-452
-NIL
-[factory-capital] of lg-factory 1
-17
-1
-11
-
-MONITOR
-1024
-216
-1135
-261
-Current Balance
-[bank-balance] of ff-factory 0
-2
-1
-11
-
-792
-452
-1025
-497
-NIL
-[average-sale-price] of lg-factory 1
-17
-1
-11
-
-TEXTBOX
-1032
-196
-1182
-238
-the people next to us are having the most annoying relationship conversation
-11
-0.0
-1
-
 @#$#@#$#@
 ## WHAT IS IT?
 
