@@ -37,6 +37,7 @@ lg-factories-own [
   tax-revenue-generated
   environmental-impact
   log-employment
+  
  
 ]
 to setup
@@ -194,7 +195,7 @@ to setup-logs
     set m^3-per-ha m^3-yield-per-ha
     set market-buy-price discount-rate
     set tax-rate log-farm-annual-tax-rate
-    set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * ( ( 100 - market-buy-price ) * .01 ) ) ;;note: gives equal weight....
+    set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - market-buy-price) );;note: gives equal weight....
   ]
 end
 
@@ -204,17 +205,20 @@ to do-lg
   log-jobs
   log-impact
   log-display
-   
-
+  log-success
 end
 
 to log-trees-and-money
     ask lg-factories [
   let new-industry-capital (factory-capital + industry-capital - annual-expense + annual-sales )
-  let new-ha-of-trees ( ( ha-of-trees + annual-plant ) * .98 )
-  set factory-capital new-industry-capital
+  set factory-capital new-industry-capital 
+    if factory-capital > (14760 + price-per-ha) [
+      set ha-of-trees ha-of-trees + 10
+      set factory-capital factory-capital - (14760 + price-per-ha)
+  let new-ha-of-trees ( ha-of-trees * .98 )
   set ha-of-trees new-ha-of-trees
   ]
+    ]
 end
 
 to log-tax
@@ -241,22 +245,26 @@ end
 to log-display
   set-default-shape lg-fields "tree"
   create-lg-fields 1
+  ask lg-fields [
+  ]
+    
+end
+  
+to log-success
+  
 end
 
 
 ;;Report shit back;;
 
 to-report annual-expense ;; lg-number-of-ha * lg-ha-cost-till20
-  report ( (ha-of-trees * ha-annual-cost) +  (annual-plant * ( first-year-ha-cost + ha-land-cost ) ) )
+  report ( ha-of-trees * ha-annual-cost ) 
 end
 
 to-report annual-sales
   report ( ha-of-trees * m^3-per-ha * average-sale-price )
 end
 
-to-report annual-plant
-  report ( 10) ;; static number needs to be replaced with actual land purchased and planted
-end
 
 
 ;;;;;;;;;; End Logs;;;;;;;;;;;;;
@@ -520,7 +528,7 @@ price-per-ha
 price-per-ha
 0
 4000
-1000
+985
 1
 1
 NIL
@@ -535,7 +543,7 @@ pulpwood-sale-price
 pulpwood-sale-price
 0
 100
-33
+100
 1
 1
 NIL
@@ -550,7 +558,7 @@ wood-to-be-treated-sale-price
 wood-to-be-treated-sale-price
 0
 100
-74
+100
 1
 1
 NIL
@@ -565,7 +573,7 @@ sawtimber-sale-price
 sawtimber-sale-price
 0
 100
-66
+100
 1
 1
 NIL
@@ -580,7 +588,7 @@ m^3-yield-per-ha
 m^3-yield-per-ha
 0
 40
-30
+40
 1
 1
 NIL
@@ -593,10 +601,10 @@ SLIDER
 238
 discount-rate
 discount-rate
-0
-100
-10
-1
+0.0
+1.0
+0.1
+.01
 1
 NIL
 HORIZONTAL
@@ -610,7 +618,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0
 100
-20
+0
 1
 1
 NIL
@@ -759,6 +767,49 @@ TEXTBOX
 1574
 108
 Palm Oil Variables
+11
+0.0
+1
+
+MONITOR
+792
+362
+1001
+407
+NIL
+[ha-of-trees] of lg-factory 1
+17
+1
+11
+
+MONITOR
+792
+407
+1001
+452
+NIL
+[factory-capital] of lg-factory 1
+17
+1
+11
+
+MONITOR
+792
+452
+1025
+497
+NIL
+[average-sale-price] of lg-factory 1
+17
+1
+11
+
+TEXTBOX
+1032
+196
+1182
+238
+the people next to us are having the most annoying relationship conversation
 11
 0.0
 1
