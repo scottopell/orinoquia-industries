@@ -151,10 +151,11 @@ to do-ff
     let max-jobs industry-people
     let curr-jobs extraction-sites * 400 ;; assuming that each extraction site can sustain 400 people working there
     
-    let running_success_total 0
-    set running_success_total 0.33 * curr-env-impact / max-env-impact
-    set running_success_total running_success_total + (0.33 * curr-tax-rate / max-tax-rate)
-    set running_success_total running_success_total + (0.33 * curr-jobs / max-jobs)
+    let running-success-total 0
+    set running-success-total 0.33 * curr-env-impact / max-env-impact
+    set running-success-total running-success-total + (0.33 * curr-tax-rate / max-tax-rate)
+    set running-success-total running-success-total + (0.33 * curr-jobs / max-jobs)
+    set success running-success-total
   ]
   
   
@@ -263,10 +264,10 @@ to setup-beef
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-24
-36
-544
-577
+28
+52
+548
+593
 20
 20
 12.44
@@ -290,10 +291,10 @@ ticks
 30.0
 
 BUTTON
-71
-601
-133
-634
+28
+16
+90
+49
 NIL
 setup
 NIL
@@ -307,10 +308,10 @@ NIL
 1
 
 BUTTON
-157
-602
-220
-635
+791
+107
+854
+140
 NIL
 go
 T
@@ -324,11 +325,11 @@ NIL
 1
 
 MONITOR
-439
-595
-496
-648
-turtles
+790
+32
+869
+85
+Industries
 count turtles
 17
 1
@@ -358,7 +359,7 @@ initial-total-capital
 initial-total-capital
 250000
 1000000
-1000000
+540000
 10000
 1
 NIL
@@ -440,32 +441,32 @@ NIL
 HORIZONTAL
 
 MONITOR
-652
-583
-765
-628
+871
+32
+970
+85
 Money
 total-capital
 17
 1
-11
+13
 
 MONITOR
-650
-641
-769
-686
+972
+32
+1091
+85
 Workers
 total-people
 17
 1
-11
+13
 
 PLOT
-827
-447
-1027
-597
+559
+443
+759
+593
 Success Rates
 NIL
 NIL
@@ -483,15 +484,15 @@ PENS
 "Beef" 1.0 0 -955883 true "" "plot [success] of bf-factory 3"
 
 SLIDER
-574
-543
-770
-576
+1211
+106
+1407
+139
 initial_beef_retail_price
 initial_beef_retail_price
 0
 100
-73
+0
 1
 1
 NIL
@@ -666,7 +667,7 @@ initial-beef-people-share
 initial-beef-people-share
 0
 100
-25
+40
 1
 1
 NIL
@@ -688,10 +689,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1157
-132
-1329
-165
+1019
+106
+1191
+139
 ff-curr-gov-reg
 ff-curr-gov-reg
 0
@@ -701,6 +702,53 @@ ff-curr-gov-reg
 1
 NIL
 HORIZONTAL
+
+BUTTON
+95
+16
+158
+49
+NIL
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+TEXTBOX
+1019
+89
+1169
+107
+Fossil Fuel Variables
+11
+0.0
+1
+
+TEXTBOX
+1210
+89
+1360
+107
+Meatpacking Variables
+11
+0.0
+1
+
+TEXTBOX
+1424
+90
+1574
+108
+Palm Oil Variables
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
