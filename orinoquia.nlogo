@@ -71,9 +71,7 @@ end
 
 to god
   let ordered sort-on [ success ] turtles
-  print "rdereded"
-  print ordered
-  print item 0 ordered
+
   ask item 3 ordered [
     set capital-share capital-share + .10
     set people-share people-share + .10
@@ -123,7 +121,7 @@ to setup-fossil-fuels
     set people-share initial-ff-people-share
     set max-gov-reg 50
     set extraction-sites 10
-    set max-extraction-sites 100
+    set max-extraction-sites 200
     set bank-balance industry-capital
   ]
   
@@ -139,32 +137,43 @@ to do-ff
   ;; main algorith here
   ask ff-factories [
     
-    set bank-balance bank-balance + industry-capital
-    if bank-balance > 7000000 [
+    set bank-balance bank-balance + (industry-capital  * (1 - ff-curr-tax-rate))
+    let current-well-cost 7000000  * (1 + ( extraction-sites / max-extraction-sites) )
+
+    if bank-balance > current-well-cost and extraction-sites < max-extraction-sites [
       set extraction-sites extraction-sites + 1
-      set bank-balance bank-balance - 7000000
+      set bank-balance bank-balance - current-well-cost
     ]
+    let barrels-produced-per-site 500
+    let profit extraction-sites * barrels-produced-per-site * price-per-barrel
+    
+    set bank-balance bank-balance + profit * (1 - ff-curr-tax-rate)
 
     ; Success Calculation here
     
     ;; get maximum environmental impact for THIS model (in my case its the max extractions sites * the max gov-reg ration (max ratio will always be 1)
     let max-env-impact max-extraction-sites * (1)
     ;; calculate the current environmental impact
-    let curr-env-impact extraction-sites * (ff-curr-gov-reg / max-gov-reg)
+    let curr-env-impact extraction-sites * (1 - (ff-curr-gov-reg / max-gov-reg))
     
     ;; define the maximum tax rate that this industry could sustain
     let max-tax-rate 0.85
-    let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
+    ;let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
     
     ;; jobs provided
     let max-jobs industry-people
     let curr-jobs extraction-sites * 400 ;; assuming that each extraction site can sustain 400 people working there
+    if curr-jobs > industry-people [
+      set curr-jobs 400
+    ]
     
     let running-success-total 0
     set running-success-total 0.33 * curr-env-impact / max-env-impact
-    set running-success-total running-success-total + (0.33 * curr-tax-rate / max-tax-rate)
+    set running-success-total running-success-total + (0.33 * (ff-curr-tax-rate / max-tax-rate))
     set running-success-total running-success-total + (0.33 * curr-jobs / max-jobs)
+
     set success running-success-total
+
   ]
   
   
@@ -710,7 +719,7 @@ ff-curr-gov-reg
 ff-curr-gov-reg
 0
 50
-21
+20
 1
 1
 NIL
@@ -762,6 +771,58 @@ Palm Oil Variables
 11
 0.0
 1
+
+SLIDER
+1019
+139
+1190
+172
+ff-curr-tax-rate
+ff-curr-tax-rate
+0
+1
+0.72
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1019
+171
+1191
+204
+price-per-barrel
+price-per-barrel
+0
+100
+57
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+1084
+284
+1141
+329
+Wells
+[extraction-sites] of ff-factory 0
+2
+1
+11
+
+MONITOR
+1024
+216
+1135
+261
+Current Balance
+[bank-balance] of ff-factory 0
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
