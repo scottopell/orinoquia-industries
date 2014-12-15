@@ -245,7 +245,7 @@ to setup-logs
     set ycor -1
     set color 115
     set first-year-ha-cost 1476
-    set factory-capital industry-capital
+   ;; set factory-capital industry-capital
     set ha-annual-cost 82.35
     set max-has-of-trees 15000
     ;; set ha-land-cost price-per-ha
