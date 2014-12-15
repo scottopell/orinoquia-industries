@@ -346,7 +346,7 @@ to-report annual-out
 end
 
 to-report annual-in
-  report ( factory-capital + (annual-sales * (1 - tax-rate)) + (industry-capital * (1 - tax-rate)) )
+  report ( factory-capital + (annual-sales * (1 - tax-rate)) + (initial-log-capital-share * (1 - tax-rate)) )
 end
 
 to-report annual-sales
@@ -648,7 +648,7 @@ initial-log-capital-share
 initial-log-capital-share
 0
 100
-25
+0
 1
 1
 NIL
@@ -663,7 +663,7 @@ initial-palm-capital-share
 initial-palm-capital-share
 0
 100
-25
+28
 1
 1
 NIL
@@ -826,7 +826,7 @@ discount-rate
 discount-rate
 0.0
 1.0
-0.1
+0.03
 .01
 1
 NIL
@@ -841,7 +841,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0.0
 1.0
-0.28
+0.19
 .01
 1
 NIL
@@ -1070,7 +1070,7 @@ distance-from-market
 distance-from-market
 0
 1000
-800
+795
 1
 1
 NIL
@@ -1137,7 +1137,7 @@ price-per-ton-oil
 price-per-ton-oil
 500
 1500
-760
+620
 1
 1
 NIL
