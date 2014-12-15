@@ -346,7 +346,7 @@ to-report annual-out
 end
 
 to-report annual-in
-  report ( factory-capital + (annual-sales * (1 - tax-rate)) + (initial-log-capital-share * (1 - tax-rate)) )
+  report ( factory-capital + (annual-sales * (1 - tax-rate)) + ((initial-log-capital-share * .01 * initial-total-capital) * (1 - tax-rate)) )
 end
 
 to-report annual-sales
@@ -648,7 +648,7 @@ initial-log-capital-share
 initial-log-capital-share
 0
 100
-0
+14
 1
 1
 NIL
