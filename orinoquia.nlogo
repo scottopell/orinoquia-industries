@@ -1,4 +1,4 @@
-globals [ total-capital total-people ]
+globals [ total-capital total-people my-ticks ]
 
 
 breed [  ff-factories ff-factory ]
@@ -59,6 +59,7 @@ lg-factories-own [
   tax-revenue-generated
   environmental-impact
   log-employment
+  max-has-of-trees
 ]
 
 to setup
@@ -67,6 +68,7 @@ to setup
   set total-people  initial-total-people
   setup-patches
   setup-industries
+  set my-ticks 0
   reset-ticks
 end
 
@@ -87,29 +89,34 @@ to go
   do-ff
   do-lg
   do-palm
+  do-bf
   
   god
   tick
 end
 
 to god
+  ask turtles [
+    let randomness .05
+    set success  success * ( (1 - randomness) + ( randomness * random-float 1))
+  ]
   let ordered sort-on [ success ] turtles
 
-  ask item 3 ordered [
-    set capital-share capital-share + .10
-    set people-share people-share + .10
-  ]
- ask item 2 ordered [
-    set capital-share capital-share + .05
-    set people-share people-share + .05
-  ]
-  ask item 1 ordered [
-    set capital-share capital-share - .05
-    set people-share people-share - .05
-  ]
   ask item 0 ordered [
-    set capital-share capital-share - .10
-    set people-share people-share - .10
+    set capital-share .35
+    set people-share .35
+  ]
+ ask item 1 ordered [
+    set capital-share .30
+    set people-share .30
+  ]
+  ask item 2 ordered [
+    set capital-share .20
+    set people-share .20
+  ]
+  ask item 3 ordered [
+    set capital-share .15
+    set people-share .15
   ]
 end
 
@@ -120,6 +127,10 @@ to-report industry-people ;; returns the amount of people available to work in a
 end
 
 to-report industry-capital ;; returns the amount of money allocated to a given industry
+  ;set my-ticks my-ticks + 1
+  ;if my-ticks > 12 [
+  ;  report 0
+  ;]
   report total-capital * capital-share * .01
 end
 
@@ -148,11 +159,6 @@ to setup-fossil-fuels
     set bank-balance industry-capital
   ]
   ;;477 orinoquia patches
-
-  
-  ask patches with [pxcor >= -4 and pxcor <= 0 and pycor >= -5 and pycor <= -1] [
-    set pcolor red;; - ff-power / 102000000000 - 0.0000001 ;;; TODO - scale the color with the success of the industry
-  ]
 end
 
 ;;;;; End Setup
@@ -174,13 +180,15 @@ to do-ff
       set bank-balance bank-balance - current-well-cost
     ]
     
-    let barrels-produced-per-site 500
-    set barrels-produced-per-site barrels-produced-per-site - (100 * ff-curr-gov-reg / max-gov-reg )
-    set profit extraction-sites * barrels-produced-per-site * price-per-barrel 
+    let barrels-produced-per-site-per-day 400
+    let days-in-month 30
+    set barrels-produced-per-site-per-day barrels-produced-per-site-per-day - (100 * ff-curr-gov-reg / max-gov-reg )
+    set profit extraction-sites * barrels-produced-per-site-per-day * days-in-month * price-per-barrel 
        
     ;; jobs provided
+
     let max-jobs industry-people
-    let curr-jobs extraction-sites * 10 ;; assuming that each extraction site can sustain 400 people working there
+    let curr-jobs extraction-sites * 5 ;; assuming that each extraction site needs ~10 people working there
     if curr-jobs > industry-people [
       set curr-jobs industry-people
     ]
@@ -203,10 +211,17 @@ to do-ff
     
     let running-success-total 0
     set running-success-total 0.33 * curr-env-impact / max-env-impact
+    print "env"
+    print curr-env-impact / max-env-impact
     set running-success-total running-success-total + (0.33 * (ff-curr-tax-rate / max-tax-rate))
-    set running-success-total running-success-total + (0.33 * curr-jobs / max-jobs)
+    print "tax"
+    print (ff-curr-tax-rate / max-tax-rate)
+    set running-success-total running-success-total + (0.33 * (ln(curr-jobs) / ln(max-jobs)))
+    print "jobs"
+    print curr-jobs / max-jobs
 
     set success running-success-total
+    print success
 
   ]
   
@@ -232,6 +247,7 @@ to setup-logs
     set first-year-ha-cost 1476
     set factory-capital industry-capital
     set ha-annual-cost 82.35
+    set max-has-of-trees 15000
     ;; set ha-land-cost price-per-ha
     ;; set pulpwood-price pulpwood-sale-price;; 33 per m^3
     ;; set wood-to-be-treated-price wood-to-be-treated-sale-price;; 74 per m^3
@@ -257,13 +273,13 @@ to log-trees-and-money
     ask lg-factories [
   set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
   set factory-capital ( annual-in - annual-out ) 
-    if factory-capital > (14760 + (price-per-ha * 10) ) [
+    if ha-of-trees < max-has-of-trees and factory-capital > (14760 + (price-per-ha * 10) ) [
       set ha-of-trees ha-of-trees + 10
       set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
       set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
     ] 
 
-    if factory-capital < 100000 [
+    if factory-capital < 5000 [
       let ha-to-sell 10
         if ha-to-sell > ha-of-trees [
           set ha-to-sell 0
@@ -314,20 +330,19 @@ to log-success
     let max-tax-rate 0.70
     ;let curr-tax-rate 0.45 ; this should be scaled based in income, just for demo purposes
 
-    
+    ;let max-has 20000
     let running-success-total 0
-    set running-success-total 0.33 * .5
+    set running-success-total 0.33 * .5 * (1 - ( ha-of-trees / max-has-of-trees ))
     set running-success-total running-success-total + (0.33 * (log-farm-annual-tax-rate / max-tax-rate))
     set running-success-total running-success-total + (0.33 * log-employment / industry-people)
 
     set success running-success-total
-    print success
 end
 
 ;;Report shit back;;
 
 to-report annual-out
-  report ( ( ha-of-trees * ha-annual-cost ) + transport-cost + labor-cost)
+  report ( ( ha-of-trees * ha-annual-cost )  + labor-cost)
 end
 
 to-report annual-in
@@ -372,13 +387,13 @@ to do-palm
       set bank-balance bank-balance - curr-palm-tree-ha-cost
     ]
     
-    let tons-oil-per-ha 4
+    let tons-oil-per-ha 3.75
 
     set profit palm-tree-has * tons-oil-per-ha * price-per-ton-oil
        
     ;; jobs provided
     let max-jobs industry-people
-    let curr-jobs palm-tree-has * 10 ;; assuming that each extraction site can sustain 400 people working there
+    let curr-jobs palm-tree-has * 5 + 2 ;; assuming that each extraction site can sustain 400 people working there
     if curr-jobs > industry-people [
       set curr-jobs industry-people
     ]
@@ -411,9 +426,12 @@ to setup-beef
   create-bf-factories 1
   ask bf-factories [
     set capital-share initial-beef-capital-share
-    set AUM 1.3
-    set cattle-per-ha 2
-    set beef-retail-price 5
+    set people-share initial-beef-people-share
+    set bank-balance industry-capital
+    set AUM .3
+    set cattle-per-ha 20
+    set beef-retail-price 50
+    set ha-purchased 0
   ]
 end
 
@@ -423,40 +441,30 @@ to do-bf
   bf-cattle
   bf-production
   bf-profit
+  bf-success
 end
 
 to bf-bank-balance
   ask bf-factories [
-
-   set bank-balance bank-balance + industry-capital
-   if bank-balance > 20000 [
-     set ha-purchased ha-purchased + 1
-     set bank-balance bank-balance - 20000
+   ;set bank-balance bank-balance + industry-capital
+   if profit < total-expenses [
+     set ha-purchased ha-purchased - 1
+     set bank-balance bank-balance + 1500
    ]
-  let max-env-impact (3)
-  let curr-env-impact .33 * .5
-
-  let max-tax-rate .65
-
-  let running-success-total 0
-  set running-success-total .33 * curr-env-impact / max-env-impact
-  set running-success-total running-success-total + (.33 * ( bf-tax-rate / max-tax-rate))
-  set running-success-total running-success-total + (.33 * industry-people)
-  ]
+   if bank-balance > 2000 [
+     set ha-purchased ha-purchased + 1
+     set bank-balance bank-balance - 2000
+   ]
+ ]
 end
 
-to bf-land
 
+
+to bf-land
   ask bf-factories [
     set new-total-ha ( initial-ha + ha-purchased )
-  ]
-  ask bf-factories [
     set total-land-cost  bf-cost-per-ha * new-total-ha
-  ]
-  ask bf-factories [
     set cost-of-grazing  AUM * cattle
-  ]
-  ask bf-factories [
     set land-expense  total-land-cost + cost-of-grazing
   ]
 end
@@ -470,21 +478,32 @@ end
 to bf-production
   ask bf-factories [
     set beef-production  cattle * percent-cattle-slaughtered
-  ]
-  ask bf-factories [
     set revenue  beef-production * beef-retail-price
+    set total-expenses  land-expense + employee-compensation / 12 * bf-people
   ]
-  ask bf-factories [
-    set total-expenses  land-expense + employee-compensation * industry-people
-  ]
+end
+
+to-report bf-people
+  report cattle / 70 
 end
 
 to bf-profit
   ask bf-factories [
-    set profit  revenue * bf-revenue-tax - total-expenses
+    set profit  revenue * bf-tax-rate - total-expenses
+    set bank-balance  bank-balance + industry-capital * (1 - bf-tax-rate) + profit
   ]
+end
+
+to bf-success
   ask bf-factories [
-    set bank-balance  industry-capital * bf-tax-rate + profit
+    let curr-env-impact .7
+    let max-tax-rate .65
+    
+    let running-success-total 0
+    set running-success-total .33 * curr-env-impact
+    set running-success-total running-success-total + (.33 * ( bf-tax-rate / max-tax-rate))
+    set running-success-total running-success-total + (.33 * bf-people / industry-people)
+    set success running-success-total
   ]
 end
 @#$#@#$#@
@@ -584,7 +603,7 @@ initial-total-capital
 initial-total-capital
 0
 1000000
-670000
+500000
 10000
 1
 NIL
@@ -698,7 +717,7 @@ NIL
 0.0
 10.0
 0.0
-1.0
+0.33
 true
 false
 "" ""
@@ -711,13 +730,13 @@ PENS
 SLIDER
 1211
 106
-1407
+1382
 139
 initial_beef_retail_price
 initial_beef_retail_price
 0
 100
-0
+4.29
 1
 1
 NIL
@@ -732,7 +751,7 @@ price-per-ha
 price-per-ha
 0
 4000
-1231
+1200
 1
 1
 NIL
@@ -822,7 +841,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0.0
 1.0
-0.23
+0.28
 .01
 1
 NIL
@@ -892,7 +911,7 @@ initial-beef-people-share
 initial-beef-people-share
 0
 100
-11
+25
 1
 1
 NIL
@@ -922,7 +941,7 @@ ff-curr-gov-reg
 ff-curr-gov-reg
 0
 50
-8
+23
 1
 1
 NIL
@@ -983,8 +1002,8 @@ SLIDER
 ff-curr-tax-rate
 ff-curr-tax-rate
 0
-1
-0.22
+.85
+0.55
 .01
 1
 NIL
@@ -999,17 +1018,17 @@ price-per-barrel
 price-per-barrel
 0
 100
-69
+30
 1
 1
 NIL
 HORIZONTAL
 
 MONITOR
-1068
-254
-1125
-299
+1072
+253
+1129
+298
 Wells
 [extraction-sites] of ff-factory 0
 1
@@ -1017,13 +1036,13 @@ Wells
 11
 
 MONITOR
-1035
-315
-1137
-360
-Balance
+1048
+310
+1150
+355
+FF-Money
 [bank-balance] of ff-factory 0
-2
+0
 1
 11
 
@@ -1034,10 +1053,10 @@ SLIDER
 236
 ff-worker-wage
 ff-worker-wage
+5000
+15000
 10000
-40000
-22500
-500
+100
 1
 NIL
 HORIZONTAL
@@ -1051,7 +1070,7 @@ distance-from-market
 distance-from-market
 0
 1000
-517
+800
 1
 1
 NIL
@@ -1064,7 +1083,7 @@ MONITOR
 452
 NIL
 [annual-in] of lg-factory 1
-17
+2
 1
 11
 
@@ -1087,8 +1106,8 @@ SLIDER
 p-curr-tax-rate
 p-curr-tax-rate
 0.0
-1
-0.32
+.45
+0.44
 .01
 1
 NIL
@@ -1103,7 +1122,7 @@ curr-palm-tree-ha-cost
 curr-palm-tree-ha-cost
 1000
 4000
-3151
+1200
 1
 1
 NIL
@@ -1118,7 +1137,7 @@ price-per-ton-oil
 price-per-ton-oil
 500
 1500
-1003
+760
 1
 1
 NIL
@@ -1133,7 +1152,7 @@ p-worker-wage
 p-worker-wage
 2000
 10000
-3885
+2500
 1
 1
 NIL
@@ -1144,7 +1163,7 @@ MONITOR
 280
 1578
 325
-P-Money
+Palm-Oil-Money
 [bank-balance] of p-factory 2
 2
 1
@@ -1162,55 +1181,55 @@ Current Hectacres
 11
 
 SLIDER
-1248
-189
-1420
-222
+1211
+139
+1383
+172
 bf-tax-rate
 bf-tax-rate
 0
 1
-0.23
+0.1
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1234
-253
-1406
-286
+1212
+172
+1384
+205
 initial-ha
 initial-ha
-200
+1
 780
-400
-10
+30
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1236
-310
-1408
-343
+1212
+204
+1384
+237
 bf-cost-per-ha
 bf-cost-per-ha
 0
-5000
-1200
 50
+7
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1250
-393
-1475
-426
+1211
+235
+1385
+268
 percent-cattle-slaughtered
 percent-cattle-slaughtered
 0
@@ -1222,34 +1241,80 @@ NIL
 HORIZONTAL
 
 SLIDER
-1227
-436
-1433
-469
+1211
+269
+1385
+302
 employee-compensation
 employee-compensation
 1000
 4000
-2000
+1200
 1
 1
 NIL
 HORIZONTAL
 
-SLIDER
-1184
-512
-1356
-545
-bf-revenue-tax
-bf-revenue-tax
-0
+MONITOR
+807
+505
+931
+550
+hectacres of trees
+[ha-of-trees] of lg-factory 1
+17
 1
-0.2
-0.01
+11
+
+MONITOR
+1211
+382
+1385
+427
+# of Cattle
+[cattle] of bf-factory 3
+17
 1
+11
+
+MONITOR
+1212
+336
+1384
+381
+Beef-Money
+[bank-balance] of bf-factory 3
+2
+1
+11
+
+MONITOR
+1211
+427
+1383
+472
+Total Expenses
+[total-expenses] of bf-factory 3
+2
+1
+11
+
+BUTTON
+168
+16
+279
+49
+reset-sliders
+set initial-total-capital 500000\nset initial-total-people 10000\n\nset initial-ff-capital-share 25\nset initial-log-capital-share 25\nset initial-palm-capital-share 25\nset initial-beef-capital-share 25\n\nset initial-ff-people-share 25\nset initial-lg-people-share 25\nset initial-palm-people-share 25\nset initial-beef-people-share 25\n\n; fossil fuels\nset ff-curr-gov-reg 23\nset ff-curr-tax-rate .55\nset price-per-barrel 30\nset ff-worker-wage 10000\n\n; log farm\nset pulpwood-price 33\nset sawtimber-price 66\nset wood-to-be-treated-price 74\nset discount-rate .1\nset m^3-yield-per-ha 20\nset price-per-ha 1200\nset log-farm-annual-tax-rate .28\nset distance-from-market 800\n\n; beef\nset initial_beef_retail_price 4.29\nset bf-tax-rate .10\nset initial-ha 30\nset bf-cost-per-ha 7\nset percent-cattle-slaughtered .20\nset employee-compensation 1200\n\n; palm oil\nset p-curr-tax-rate .44\nset curr-palm-tree-ha-cost 1200\nset price-per-ton-oil 620\nset p-worker-wage 2500\n
 NIL
-HORIZONTAL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
