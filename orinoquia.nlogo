@@ -813,7 +813,7 @@ discount-rate
 discount-rate
 0.0
 1.0
-0.1
+0.2
 .01
 1
 NIL
@@ -828,7 +828,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0.0
 1.0
-0.28
+0.8
 .01
 1
 NIL
