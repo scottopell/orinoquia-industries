@@ -1,4 +1,4 @@
-globals [ total-capital total-people my-ticks ]
+globals [ total-capital total-people ]
 
 
 breed [  ff-factories ff-factory ]
@@ -68,7 +68,6 @@ to setup
   set total-people  initial-total-people
   setup-patches
   setup-industries
-  set my-ticks 0
   reset-ticks
 end
 
@@ -127,10 +126,6 @@ to-report industry-people ;; returns the amount of people available to work in a
 end
 
 to-report industry-capital ;; returns the amount of money allocated to a given industry
-  ;set my-ticks my-ticks + 1
-  ;if my-ticks > 12 [
-  ;  report 0
-  ;]
   report total-capital * capital-share * .01
 end
 
@@ -211,18 +206,10 @@ to do-ff
     
     let running-success-total 0
     set running-success-total 0.33 * curr-env-impact / max-env-impact
-    print "env"
-    print curr-env-impact / max-env-impact
     set running-success-total running-success-total + (0.33 * (ff-curr-tax-rate / max-tax-rate))
-    print "tax"
-    print (ff-curr-tax-rate / max-tax-rate)
     set running-success-total running-success-total + (0.33 * (ln(curr-jobs) / ln(max-jobs)))
-    print "jobs"
-    print curr-jobs / max-jobs
-
+    
     set success running-success-total
-    print success
-
   ]
   
   
@@ -284,9 +271,9 @@ to log-trees-and-money
         if ha-to-sell > ha-of-trees [
           set ha-to-sell 0
         ]
-       set ha-of-trees ha-of-trees - ha-to-sell
-      set factory-capital factory-capital + ( price-per-ha * ha-to-sell )
-  ]
+        set ha-of-trees ha-of-trees - ha-to-sell
+        set factory-capital factory-capital + ( price-per-ha * ha-to-sell )
+      ]
     ]
     
 end
