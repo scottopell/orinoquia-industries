@@ -247,7 +247,7 @@ to setup-logs
     set first-year-ha-cost 1476
    ;; set factory-capital industry-capital
     set ha-annual-cost 82.35
-    set max-has-of-trees 15000
+    set max-has-of-trees 30000
     ;; set ha-land-cost price-per-ha
     ;; set pulpwood-price pulpwood-sale-price;; 33 per m^3
     ;; set wood-to-be-treated-price wood-to-be-treated-sale-price;; 74 per m^3
@@ -274,8 +274,8 @@ to log-trees-and-money
   set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
   set factory-capital ( annual-in - annual-out ) 
     if ha-of-trees < max-has-of-trees and factory-capital > (14760 + (price-per-ha * 10) ) [
-      set ha-of-trees ha-of-trees + 10
-      set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
+      set ha-of-trees ha-of-trees + buy-rate
+      set factory-capital factory-capital - ((1476 * buy-rate) + (price-per-ha * buy-rate ) )
       set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
     ] 
 
@@ -535,10 +535,10 @@ ticks
 30.0
 
 BUTTON
-28
-16
-90
-49
+560
+485
+622
+518
 NIL
 setup
 NIL
@@ -826,7 +826,7 @@ discount-rate
 discount-rate
 0.0
 1.0
-0.2
+0.1
 .01
 1
 NIL
@@ -841,7 +841,7 @@ log-farm-annual-tax-rate
 log-farm-annual-tax-rate
 0.0
 1.0
-0.8
+0.28
 .01
 1
 NIL
@@ -948,10 +948,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-95
-16
-158
-49
+681
+446
+744
+479
 NIL
 go
 T
@@ -1075,17 +1075,6 @@ distance-from-market
 1
 NIL
 HORIZONTAL
-
-MONITOR
-799
-407
-974
-452
-NIL
-[annual-in] of lg-factory 1
-2
-1
-11
 
 MONITOR
 800
@@ -1300,12 +1289,12 @@ Total Expenses
 11
 
 BUTTON
-168
-16
-279
-49
+560
+445
+671
+478
 reset-sliders
-set initial-total-capital 500000\nset initial-total-people 10000\n\nset initial-ff-capital-share 25\nset initial-log-capital-share 25\nset initial-palm-capital-share 25\nset initial-beef-capital-share 25\n\nset initial-ff-people-share 25\nset initial-lg-people-share 25\nset initial-palm-people-share 25\nset initial-beef-people-share 25\n\n; fossil fuels\nset ff-curr-gov-reg 23\nset ff-curr-tax-rate .55\nset price-per-barrel 30\nset ff-worker-wage 10000\n\n; log farm\nset pulpwood-price 33\nset sawtimber-price 66\nset wood-to-be-treated-price 74\nset discount-rate .1\nset m^3-yield-per-ha 20\nset price-per-ha 1200\nset log-farm-annual-tax-rate .28\nset distance-from-market 800\n\n; beef\nset initial_beef_retail_price 4.29\nset bf-tax-rate .10\nset initial-ha 30\nset bf-cost-per-ha 7\nset percent-cattle-slaughtered .20\nset employee-compensation 1200\n\n; palm oil\nset p-curr-tax-rate .44\nset curr-palm-tree-ha-cost 1200\nset price-per-ton-oil 620\nset p-worker-wage 2500\n
+set initial-total-capital 500000\nset initial-total-people 10000\n\nset initial-ff-capital-share 25\nset initial-log-capital-share 25\nset initial-palm-capital-share 25\nset initial-beef-capital-share 25\n\nset initial-ff-people-share 25\nset initial-lg-people-share 25\nset initial-palm-people-share 25\nset initial-beef-people-share 25\n\n; fossil fuels\nset ff-curr-gov-reg 23\nset ff-curr-tax-rate .55\nset price-per-barrel 30\nset ff-worker-wage 10000\n\n; log farm\nset pulpwood-price 33\nset sawtimber-price 66\nset wood-to-be-treated-price 74\nset discount-rate .1\nset m^3-yield-per-ha 20\nset price-per-ha 1200\nset log-farm-annual-tax-rate .28\nset distance-from-market 800\nset buy-rate 10\n\n; beef\nset initial_beef_retail_price 4.29\nset bf-tax-rate .10\nset initial-ha 30\nset bf-cost-per-ha 7\nset percent-cattle-slaughtered .20\nset employee-compensation 1200\n\n; palm oil\nset p-curr-tax-rate .44\nset curr-palm-tree-ha-cost 1200\nset price-per-ton-oil 620\nset p-worker-wage 2500\n
 NIL
 1
 T
@@ -1315,6 +1304,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+791
+400
+963
+433
+buy-rate
+buy-rate
+0
+100
+10
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
