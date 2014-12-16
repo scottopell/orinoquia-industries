@@ -495,13 +495,13 @@ to bf-success
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-28
-52
-548
-593
-20
-20
-12.44
+1632
+107
+1877
+165
+9
+1
+9.11
 1
 10
 1
@@ -511,10 +511,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--20
-20
--20
-20
+-9
+9
+-1
+1
 0
 0
 1
@@ -556,10 +556,10 @@ NIL
 1
 
 MONITOR
-790
-32
-869
-85
+1643
+31
+1722
+84
 Industries
 count turtles
 17
@@ -672,32 +672,32 @@ NIL
 HORIZONTAL
 
 MONITOR
-871
-32
-970
-85
-Money
+790
+33
+889
+86
+Capital
 total-capital
 17
 1
 13
 
 MONITOR
-972
-32
-1091
-85
-Workers
+891
+33
+1000
+86
+Labor
 total-people
 17
 1
 13
 
 PLOT
-25
-595
-1014
-745
+38
+41
+548
+233
 Success Rates
 NIL
 NIL
@@ -762,7 +762,7 @@ HORIZONTAL
 SLIDER
 790
 172
-1007
+1001
 205
 wood-to-be-treated-price
 wood-to-be-treated-price
@@ -822,7 +822,7 @@ HORIZONTAL
 SLIDER
 791
 321
-1009
+1002
 354
 log-farm-annual-tax-rate
 log-farm-annual-tax-rate
@@ -1012,10 +1012,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1072
-253
-1129
-298
+40
+240
+97
+285
 Wells
 [extraction-sites] of ff-factory 0
 1
@@ -1023,10 +1023,10 @@ Wells
 11
 
 MONITOR
-1048
-310
-1150
-355
+107
+240
+209
+285
 FF-Money
 [bank-balance] of ff-factory 0
 0
@@ -1051,7 +1051,7 @@ HORIZONTAL
 SLIDER
 791
 362
-1011
+1003
 395
 distance-from-market
 distance-from-market
@@ -1062,17 +1062,6 @@ distance-from-market
 1
 NIL
 HORIZONTAL
-
-MONITOR
-800
-455
-985
-500
-NIL
-[annual-out] of lg-factory 1
-17
-1
-11
 
 SLIDER
 1424
@@ -1135,10 +1124,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-1451
-280
-1578
-325
+404
+241
+531
+286
 Palm-Oil-Money
 [bank-balance] of p-factory 2
 2
@@ -1146,10 +1135,10 @@ Palm-Oil-Money
 11
 
 MONITOR
-1452
-336
-1578
-381
+405
+294
+531
+339
 Current Hectacres
 [palm-tree-has] of p-factory 2
 2
@@ -1232,10 +1221,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-807
-505
-931
-550
+39
+292
+208
+337
 hectacres of trees
 [ha-of-trees] of lg-factory 1
 17
@@ -1243,10 +1232,10 @@ hectacres of trees
 11
 
 MONITOR
-1211
-382
-1385
-427
+220
+294
+394
+339
 # of Cattle
 [cattle] of bf-factory 3
 17
@@ -1254,10 +1243,10 @@ MONITOR
 11
 
 MONITOR
-1212
-336
-1384
-381
+220
+241
+392
+286
 Beef-Money
 [bank-balance] of bf-factory 3
 2
@@ -1265,10 +1254,10 @@ Beef-Money
 11
 
 MONITOR
-1211
-427
-1383
-472
+221
+344
+395
+389
 Total Expenses
 [total-expenses] of bf-factory 3
 2
@@ -1295,7 +1284,7 @@ NIL
 SLIDER
 791
 400
-963
+1003
 433
 buy-rate
 buy-rate
