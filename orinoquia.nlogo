@@ -1,4 +1,4 @@
-globals [ total-capital total-people my-ticks ]
+globals [ total-capital total-people ]
 
 
 breed [  ff-factories ff-factory ]
@@ -68,7 +68,6 @@ to setup
   set total-people  initial-total-people
   setup-patches
   setup-industries
-  set my-ticks 0
   reset-ticks
 end
 
@@ -127,10 +126,6 @@ to-report industry-people ;; returns the amount of people available to work in a
 end
 
 to-report industry-capital ;; returns the amount of money allocated to a given industry
-  ;set my-ticks my-ticks + 1
-  ;if my-ticks > 12 [
-  ;  report 0
-  ;]
   report total-capital * capital-share * .01
 end
 
@@ -211,18 +206,10 @@ to do-ff
     
     let running-success-total 0
     set running-success-total 0.33 * curr-env-impact / max-env-impact
-    print "env"
-    print curr-env-impact / max-env-impact
     set running-success-total running-success-total + (0.33 * (ff-curr-tax-rate / max-tax-rate))
-    print "tax"
-    print (ff-curr-tax-rate / max-tax-rate)
     set running-success-total running-success-total + (0.33 * (ln(curr-jobs) / ln(max-jobs)))
-    print "jobs"
-    print curr-jobs / max-jobs
-
+    
     set success running-success-total
-    print success
-
   ]
   
   
@@ -271,22 +258,22 @@ end
 
 to log-trees-and-money
     ask lg-factories [
-  set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
-  set factory-capital ( annual-in - annual-out ) 
-    if ha-of-trees < max-has-of-trees and factory-capital > (14760 + (price-per-ha * 10) ) [
-      set ha-of-trees ha-of-trees + 10
-      set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
-      set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
-    ] 
-
-    if factory-capital < 5000 [
-      let ha-to-sell 10
+      set average-sale-price ( .33 * ( pulpwood-price + wood-to-be-treated-price + sawtimber-price ) * (1 - discount-rate) ) ;;note: gives equal weight....
+      set factory-capital ( annual-in - annual-out ) 
+      if ha-of-trees < max-has-of-trees and factory-capital > (14760 + (price-per-ha * 10) ) [
+        set ha-of-trees ha-of-trees + 10
+        set factory-capital factory-capital - (14760 + (price-per-ha * 10 ) )
+        set tax-revenue-generated ( ( annual-sales * log-farm-annual-tax-rate ) + (industry-capital * ( log-farm-annual-tax-rate) ) )
+      ] 
+      
+      if factory-capital < 5000 [
+        let ha-to-sell 10
         if ha-to-sell > ha-of-trees [
           set ha-to-sell 0
         ]
-       set ha-of-trees ha-of-trees - ha-to-sell
-      set factory-capital factory-capital + ( price-per-ha * ha-to-sell )
-  ]
+        set ha-of-trees ha-of-trees - ha-to-sell
+        set factory-capital factory-capital + ( price-per-ha * ha-to-sell )
+      ]
     ]
     
 end
@@ -1137,7 +1124,7 @@ price-per-ton-oil
 price-per-ton-oil
 500
 1500
-760
+620
 1
 1
 NIL
